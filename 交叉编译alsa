@@ -1,0 +1,27 @@
+
+
+https://blog.csdn.net/yyz_1987/article/details/78503371
+
+tar -xvz -f libmad-0.15.1b.tar.gz
+tar jxvf alsa-lib-1.1.6.tar.bz2 
+
+cd libmad-0.15.1b/
+./configure CC=arm-linux-gnueabi-gcc --host=arm-linux --disable-shared --disable-debugging --prefix=/opt/libmab/mad 
+
+如果make出现错误：error: unrecognized command line option “-fforce-mem”，就在Makefile中找到“-fforce-mem”字符串然后删除。
+
+/tmp/ccBAlwQX.s: Assembler messages:
+/tmp/ccBAlwQX.s:1302: Error: selected processor does not support Thumb mode `rsc r5,r5,#0'
+
+原因:交叉工具链用错了,换其他的版本试试
+
+谢谢了，后面我选择了lame这个库去解码MP3
+
+./configure --host=arm-linux --prefix=/opt/libmad-arm --enable-fpm=arm --enable-shared --enable-static
+
+
+
+cd ../alsa-lib-1.1.6/
+./configure CC=arm-linux-gnueabi-gcc --host=arm-linux  --prefix=/opt/arm-alsa
+
+

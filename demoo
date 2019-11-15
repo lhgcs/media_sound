@@ -1,0 +1,53 @@
+
+
+'''
+pip install playsound  
+'''
+from playsound import playsound  
+playsound('/path/to/a/sound/file/you/want/to/play.mp3')
+
+
+'''
+pip install pygame
+'''
+import pygame  
+pygame.mixer.init()  
+song = pygame.mixer.Sound('thesong.ogg')  
+
+# song.play()  
+pygame.mixer.music.play()
+#pygame.mixer.music.pause() #暂停
+#pygame.mixer.music.unpause()#取消暂停
+#pygame.mixer.music.stop()
+pygame.quit()  
+
+
+'''
+whl下载地址：https://github.com/intxcc/pyaudio_portaudio/releases
+'''
+import pyaudio  
+import wave  
+chunk = 1024  
+wf = wave.open('thesong.wav', 'rb')  
+p = pyaudio.PyAudio()  
+stream = p.open(  
+    format = p.get_format_from_width(wf.getsampwidth()),  
+    channels = wf.getnchannels(),  
+    rate = wf.getframerate(),  
+    output = True)  
+data = wf.readframes(chunk)  
+while data != '':  
+    stream.write(data)  
+    data = wf.readframes(chunk)  
+stream.close()  
+p.terminate()  
+
+
+import winsound
+# 滴一声,frequency分贝数(37-32767),duration持续时间(毫秒)
+winsound.Beep(frequency, duration)
+# Play Windows exit sound.
+winsound.PlaySound("SystemExit", winsound.SND_ALIAS)
+# Probably play Windows default sound, if any is registered (because
+# "*" probably isn't the registered name of any sound).
+winsound.PlaySound("*", winsound.SND_ALIAS)

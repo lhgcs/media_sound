@@ -1,0 +1,145 @@
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+#include <string>
+
+#include <iostream>
+#include <malloc.h>
+
+
+
+// /**
+//  * @brief read_big_file 读大文件
+//  * @param fileName      文件名
+//  * @return              读取的字节数
+//  */
+// static long read_big_file(const char *fileName) {
+
+//     long len = -1;
+//     char *buff;
+//     unsigned long buffSize = 200;
+//     unsigned long seekSum = 0;
+//     unsigned long fileSize = 0;
+
+//     //获取文件大小
+//     fileSize = get_file_size(fileName);
+//     if(fileSize <= 0) {
+//         return -1;
+//     }
+//     //分配内存
+//     if (getMemory(&buff, buffSize + 1) != 0) {
+//         return -1;
+//     }
+
+//     while (seekSum < fileSize) {
+//         len = read_file(fileName, buff, buffSize, seekSum);
+//         if(len > 0) {
+//             seekSum += len;
+//             buff[len] = '\0';
+//             std::cout << buff << std::endl;
+//         }else{
+//             std::cout << "error" << std::endl;
+//         }
+//     }
+
+//     //释放内存
+//     free(buff);
+//     return seekSum;
+// }
+
+// #define FILE_MAX_SIZE (5000UL)   //整个文件的大小（小心数据溢出）
+
+// /**
+//  * @brief write_file_cover 循环覆盖写文件（文件大小超过指定的长度则从头开始覆盖）
+//  * @param fileName         文件名
+//  * @param writeBuff        缓冲
+//  * @return                 写入的字节数
+//  */
+// static long write_file_cover(const char *fileName, char *writeBuff) {
+//    int len = 0;
+//    char buff[5];
+//    int buffSize = 5;
+//    int writeBuffSize = 0;      //还需要写入的数据的长度
+//    unsigned int currentPos = 0;//当前光标位置
+//    unsigned int writeLen = 0;  //这次写入的数据长度
+//    long fileEnd = 0;           //文件大小
+//    long writeSum = 0;          //写入的字节总数
+
+//    int fd = open(fileName, O_RDWR | O_CREAT, 0777);
+//    if (fd > 0) {
+//        //读取上一次光标的位置（文件最开头的5个字节存储上一次光标的位置）
+//        memset(buff, 0, buffSize);
+//        len = read(fd, buff, buffSize);
+
+//        if(len == buffSize) {
+//            for (int i=0; i<len; i++) {
+//                if(buff[i] >= '0' && buff[i] <= '9') {
+//                     currentPos += currentPos*10 + buff[i]-48;
+//                }else{
+//                    currentPos = buffSize;
+//                    break;
+//                }
+//            }
+//            //上一次光标的超过的文件的最大值
+//            if(currentPos >= FILE_MAX_SIZE) {
+//                currentPos = buffSize;
+//            }else{
+//                //当前文件末尾
+//                fileEnd = lseek(fd, 0, SEEK_END);
+//                if(fileEnd != -1) {
+//                    //如果偏移量超过了当前文件末尾，则偏移到文件末尾
+//                    currentPos = currentPos >= fileEnd ? fileEnd : currentPos;
+//                }
+//            }
+//        }else{
+//            currentPos +=buffSize;
+//        }
+
+//        //写文件
+//        writeBuffSize = strlen(writeBuff);
+//        while(writeBuffSize > 0) {
+//            //偏移
+//            lseek(fd, currentPos, SEEK_SET);
+
+//            //剩余的空间daily可一次性写完
+//            if(currentPos + writeBuffSize <= FILE_MAX_SIZE) {
+//                 len = write(fd, writeBuff, writeBuffSize);
+//                 writeBuffSize = 0;
+//            }else{
+//                 //先写一部分，剩下一部分从头开始覆盖写
+//                 writeLen = FILE_MAX_SIZE - currentPos;
+//                 len = write(fd, writeBuff, writeLen);
+
+//                 writeBuff += writeLen;
+//                 writeBuffSize -= writeLen;
+//                 currentPos = buffSize;
+//            }
+
+//            //已写入的字节数
+//            len = len > 0 ? len : 0;
+//            writeSum += len;
+//        }
+
+//        //获取现在光标的位置
+//        memset(buff, 0, sizeof(buff));
+//        currentPos = lseek(fd, 0, SEEK_CUR);
+//        sprintf(buff,"%05u", currentPos);
+//        //保存现在光标的位置到文件开头
+//        lseek(fd, 0, SEEK_SET);
+//        write(fd, buff, buffSize);
+
+//        close(fd);
+//        return writeSum;
+//    }
+//    return -1;
+// }
+

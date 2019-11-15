@@ -1,0 +1,178 @@
+```
+/*
+ * pwm_buz.cpp
+ *
+ *  Created on: Mar 6, 2017
+ *      Author: xiao
+ */
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
+#include <unistd.h>
+#include <termios.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "beep.h"
+
+#define DBG_EN 	0
+#if (DBG_EN == 1)
+#define printf_dbg(x,arg...) printf("[beep_debug]"x,##arg)
+#else
+#define printf_dbg(x,arg...)
+#endif
+
+#define printf_info(x,arg...) printf("[beep_info]"x,##arg)
+#define printf_warn(x,arg...) printf("[beep_warnning]"x,##arg)
+#define printf_err(x,arg...) printf("[beep_error]"x,##arg)
+
+
+beep::beep()
+{
+	enable_fd = -1;
+	duty_fd = -1;
+	period_fd = -1;
+	duty_ratio = 0;
+	enabled = true;
+}
+
+/* 微秒级 延时 */
+void beep::udelay(int us)
+{
+    struct timeval delay;
+    delay.tv_sec = 0;
+    delay.tv_usec = us ;
+    select(0, NULL, NULL, NULL, &delay);
+}
+
+/* 毫秒级 延时 */
+void beep::mdelay(int ms)
+{
+    struct timeval delay;
+    delay.tv_sec = 0;
+    delay.tv_usec = ms * 1000;
+    select(0, NULL, NULL, NULL, &delay);
+}
+
+int beep::init(unsigned int dutyratio)
+{
+
+	period_fd = open("/sys/class/jz-pwm/pwm0/period", O_WRONLY);
+	if(period_fd < 0)
+	{
+		printf_err("Open PWM period fail, %s(%d)\n", strerror(errno), errno);
+		return -1;
+	}
+
+	duty_fd = open("/sys/class/jz-pwm/pwm0/dutyratio", O_WRONLY);
+	if(duty_fd < 0)
+	{
+		period_fd = -1;
+		printf_err("Open PWM duty_ratio fail, %s(%d)\n", strerror(errno), errno);
+		return -1;
+	}
+
+	enable_fd = open("/sys/class/jz-pwm/pwm0/enable", O_WRONLY);
+	if(enable_fd < 0)
+	{
+		duty_fd = -1;
+		period_fd = -1;
+		printf_err("Open PWM enable fail, %s(%d)\n", strerror(errno), errno);
+		return -1;
+	}
+
+	write(enable_fd, "0", sizeof("0"));
+
+	duty_ratio = dutyratio;
+	return 0;
+}
+
+int beep::exit()
+{
+	close(enable_fd);
+	close(duty_fd);
+	close(period_fd);
+
+	enable_fd = -1;
+	duty_fd = -1;
+	period_fd = -1;
+	return 0;
+}
+
+void beep::enable()
+{
+	enabled = true;
+}
+
+void beep::disable()
+{
+	enabled = false;
+}
+
+int beep::setduty(unsigned int duty)
+{
+	int ret;
+	char data[20] ={0};
+
+	sprintf(data, "%u",  duty);
+	ret = write(duty_fd, data, strlen(data));
+	if(ret < 0) {
+		printf_err("Write duty_ratio fail\n");
+	}
+
+	duty_ratio = duty;
+	return 0;
+}
+
+void beep::setperiod(unsigned int period)
+{
+	int ret;
+	char data[20] ={0};
+
+	sprintf(data, "%u",  period);
+	ret = write(period_fd, data, strlen(data));
+	if(ret < 0) {
+		printf_err("Write period fail\n");
+	}
+}
+
+/*
+ * delay 240 is 400us
+ * delay 200 is 333us
+ */
+int beep::openmusic(unsigned int delay, unsigned int high, unsigned int low)
+{
+	setperiod(high);
+	setduty(duty_ratio);
+	mdelay(delay);
+
+	setperiod(low);
+	setduty(duty_ratio);
+	mdelay(delay);
+
+	setperiod(high);
+	setduty(duty_ratio);
+	mdelay(delay);
+
+	setperiod(low);
+	setduty(duty_ratio);
+	mdelay(delay);
+
+	write(enable_fd, "0", sizeof("0"));
+
+	return 0;
+}
+
+int beep::okmusic(unsigned int msleep, unsigned int period)
+{
+	setperiod(period);
+	setduty(duty_ratio);
+
+	mdelay(msleep);
+
+	write(enable_fd, "0", sizeof("0"));
+
+	return 0;
+}

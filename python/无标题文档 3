@@ -1,0 +1,29 @@
+（1）节点
+系统中有没有“/sys/class/gpio”这个文件夹。如果没有请在编译
+内核的时候加入 Device Drivers —> GPIO Support —> /sys/class/gpio/… (sysfs interface)。
+
+（2）
+# cd /sys/class/gpio/
+
+
+（3）计算
+
+PD2 =32×（'D'-'A'）+2 =98
+
+（4）引出
+# echo 98 > /sys/class/gpio/export
+
+（5）生成目录
+# cd gpio98/
+
+（6）设置为输出模式，并且输出低电平
+# echo low > direction
+
+（7）输出高电平
+# echo 1 > value
+
+（8）输出低电平
+# echo 0 > value
+————————————————
+版权声明：本文为CSDN博主「onj123」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/onj123/article/details/80600212
